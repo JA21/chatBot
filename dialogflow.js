@@ -15,7 +15,7 @@ const sessionClient = new dialogflow.SessionsClient({
  * Send a query to the dialogflow agent, and return the query result.
  * @param {string} projectId The project to be used
  */
-async function sendToDialogFlow(msg, session, source, params) {
+async function sendToDialogFlow(msg, session, params) { //delete param source
   let textToDialogFlow = msg;
   try {
     const sessionPath = sessionClient.sessionPath(
@@ -43,9 +43,9 @@ async function sendToDialogFlow(msg, session, source, params) {
     let defaultResponses = [];
     if (result.action !== "input.unknown") {
       result.fulfillmentMessages.forEach((element) => {
-        if (element.platform === source) {
+        //if (element.platform === source) {
           defaultResponses.push(element);
-        }
+       // }
       });
     }
     if (defaultResponses.length === 0) {
@@ -67,3 +67,5 @@ async function sendToDialogFlow(msg, session, source, params) {
 module.exports = {
   sendToDialogFlow,
 };
+
+sendToDialogFlow("hola",'123123')

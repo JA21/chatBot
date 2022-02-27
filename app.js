@@ -12,9 +12,8 @@ venom
 
 function start(client) {
   client.onMessage((message) => {
-    console.log(client);
       client
-        .sendText(message.from, 'Welcome ')
+        .sendText(message.from, message.body)
         .then((result) => {
           console.log('Result: ', result); //return object success
         })  
