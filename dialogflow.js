@@ -39,7 +39,7 @@ async function sendToDialogFlow(msg, session, params) { //delete param source
     };
     const responses = await sessionClient.detectIntent(request);
     const result = responses[0].queryResult;
-    console.log("INTENT EMPAREJADO: ", result.intent.displayName);
+    console.log("INTENT EMPAREJADO: ");
     let defaultResponses = [];
     if (result.action !== "input.unknown") {
       result.fulfillmentMessages.forEach((element) => {
@@ -56,6 +56,7 @@ async function sendToDialogFlow(msg, session, params) { //delete param source
       });
     }
     result.fulfillmentMessages = defaultResponses;
+    console.log(JSON.stringify(result,null," "));
     return result;
     // console.log("se enviara el resultado: ", result);
   } catch (e) {
@@ -68,4 +69,4 @@ module.exports = {
   sendToDialogFlow,
 };
 
-sendToDialogFlow("hola",'123123')
+
