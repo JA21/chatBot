@@ -1,8 +1,10 @@
-const uuid =require('uuid');
+const uuid = require('uuid');
 const venom = require('venom-bot');
 const dialogflow = require('./dialogflow');
+const fs = require('fs');
+const mime = require('mime-types');
 
-const sessionIds=new Map();
+const sessionIds = new Map();
 venom
   .create({
     session: 'session-name', //name of session
@@ -16,36 +18,50 @@ venom
 function start(client) {
   client.onMessage(async (message) => {
     setSessionAndUser(message.from);
-    let session= sessionIds.get(message.from);
-    let payload=await dialogflow.sendToDialogFlow(message.body,session)
-    let responses= payload.fulfillmentMessages;
+    let session = sessionIds.get(message.from);
+    let payload = await dialogflow.sendToDialogFlow(message.body, session)
+    let responses = payload.fulfillmentMessages;
     for (const response of responses) {
       sendMessageToWhatsapp(client, message, response);
-  
+
     }
-     
+
+    if (message.isMedia === true || message.isMMS === true) {
+      const buffer = await client.decryptFile(message);
+      // At this point you can do whatever you want with the buffer
+      // Most likely you want to write it into a file
+      const fileName = `some-file-name.${mime.extension(message.mimetype)}`;
+      await fs.writeFile(fileName, buffer, (err) => {
+      if(err){
+        console.log(err);
+      }else{
+        console.log("File write succes,", fs.readFileSync(fileName))
+      }
+      });
+    }
+
   });
 }
 
 function sendMessageToWhatsapp(client, message, response) {
-  return new Promise((resolve,reject)=>{
+  return new Promise((resolve, reject) => {
     client
-    .sendText(message.from, response.text.text[0])
-    .then((result) => {
-      console.log('Result: ', result); //return object success
-      resolve(result);
-    })
-    .catch((erro) => {
-      console.error('Error when sending: ', erro);
-      reject(erro)
-    });
+      .sendText(message.from, response.text.text[0])
+      .then((result) => {
+        console.log('Result: ', result); //return object success
+        resolve(result);
+      })
+      .catch((erro) => {
+        console.error('Error when sending: ', erro);
+        reject(erro)
+      });
   })
 }
 
-async function setSessionAndUser(senderId){
-  try{
-    if(!sessionIds.has(senderId)) sessionIds.set(senderId,uuid.v1());
-   }catch(error){
+async function setSessionAndUser(senderId) {
+  try {
+    if (!sessionIds.has(senderId)) sessionIds.set(senderId, uuid.v1());
+  } catch (error) {
     throw error;
-}
+  }
 }
